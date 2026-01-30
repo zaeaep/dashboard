@@ -1,0 +1,34 @@
+{
+  "name": "openwebui",
+  "version": "1.0.0",
+  "description": "A comprehensive personal dashboard integrating Google Calendar, Garmin fitness data, weather information, and AI-powered suggestions for optimal day planning.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zaeaep/dashboard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/zaeaep/dashboard/issues"
+  },
+  "homepage": "https://github.com/zaeaep/dashboard#readme",
+  "dependencies": {
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/cli": "^8.0.2",
+    "@capacitor/core": "^8.0.2",
+    "@capacitor/haptics": "^8.0.0",
+    "@capacitor/ios": "^8.0.2",
+    "@capacitor/local-notifications": "^8.0.0",
+    "@capacitor/network": "^8.0.0",
+    "@capacitor/splash-screen": "^8.0.0"
+  }
+}

@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Dashboard">
+    <title>Personal Dashboard</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --background-color: #f0f2f5;
+            --card-background: #ffffff;
+            --text-color: #333;
+            --text-secondary: #666;
+            --border-radius: 15px;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --safe-area-inset-top: env(safe-area-inset-top);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom);
+            --safe-area-inset-left: env(safe-area-inset-left);
+            --safe-area-inset-right: env(safe-area-inset-right);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: #1a1a1a;
+                --card-background: #2a2a2a;
+                --text-color: #ffffff;
+                --text-secondary: #aaa;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-top: var(--safe-area-inset-top);
+            padding-bottom: var(--safe-area-inset-bottom);
+            padding-left: var(--safe-area-inset-left);
+            padding-right: var(--safe-area-inset-right);
+        }
+
+        .container {
+            max-width: 100%;
+            padding: 16px;
+            padding-bottom: calc(16px + var(--safe-area-inset-bottom));
+        }
+
+        /* Mobile Header */
+        header {
+            background: var(--card-background);
+            padding: 20px 16px;
+            padding-top: calc(20px + var(--safe-area-inset-top));
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.5em;
+            margin-bottom: 8px;
+        }
+
+        .timestamp {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            touch-action: manipulation;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            opacity: 0.8;
+        }
+
+        .btn-icon {
+            font-size: 1.2em;
+        }
+
+        /* Mobile Grid */
+        .grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--card-background);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 16px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icon {
+            font-size: 1.2em;
+        }
+
+        /* Loading State */
+        #loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Weather Widget */
+        .weather-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .temperature {
+            font-size: 3em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .weather-description {
+            font-size: 1.1em;
+            text-transform: capitalize;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            font-size: 0.9em;
+        }
+
+        .weather-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Garmin Widget */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 12px;
+            background: var(--background-color);
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Events */
+        .event-item {
+            padding: 12px;
+            background: var(--background-color);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .event-time {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .event-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .event-description {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+        }
+
+        .scrollable-events {
+            max-height: 300px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .no-events {
+            color: var(--text-secondary);
+            font-style: italic;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Setup Messages */
+        .setup-message {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffe082 100%);
+            border-left: 4px solid #ffa726;
+            border-radius: 8px;
+            padding: 16px;
+            color: #333;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .setup-message a {
+            color: #1976d2;
+            text-decoration: underline;
+        }
+
+        /* AI Content */
+        .ai-content {
+            line-height: 1.6;
+            white-space: pre-wrap;
+            font-size: 0.95em;
+        }
+
+        .ai-refresh-btn {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        /* Todo List */
+        .todo-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .todo-input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            background: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: var(--background-color);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .todo-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .todo-content {
+            flex: 1;
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .todo-delete-btn {
+            background: #ff6b6b;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* Timer */
+        .timer-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .timer-input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            background: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .timer-countdown {
+            font-size: 3em;
+            font-weight: bold;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            color: var(--primary-color);
+            margin: 20px 0;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .timer-control-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            min-height: 44px;
+        }
+
+        /* Settings Sidebar */
+        .settings-btn {
+            position: fixed;
+            top: calc(60px + var(--safe-area-inset-top));
+            right: 16px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            z-index: 99;
+        }
+
+        .settings-sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 85%;
+            max-width: 350px;
+            height: 100vh;
+            background: var(--card-background);
+            box-shadow: -2px 0 10px rgba(0,0,0,0.3);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: calc(20px + var(--safe-area-inset-top)) 20px 20px;
+        }
+
+        .settings-sidebar.active {
+            right: 0;
+        }
+
+        .settings-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .settings-overlay.active {
+            display: block;
+        }
+
+        /* Pull to Refresh */
+        .pull-to-refresh {
+            position: fixed;
+            top: calc(var(--safe-area-inset-top) + 60px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-background);
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 98;
+        }
+
+        .pull-to-refresh.active {
+            opacity: 1;
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Hide scrollbar but keep functionality */
+        .scrollable-events::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .scrollable-events::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1>📊 Personal Dashboard</h1>
+        <div class="timestamp" id="timestamp">Loading...</div>
+        <div class="header-actions">
+            <button class="btn" onclick="refreshDashboard()">
+                <span class="btn-icon">🔄</span> Refresh
+            </button>
+        </div>
+    </header>
+
+    <!-- Settings Button -->
+    <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+
+    <!-- Settings Overlay -->
+    <div class="settings-overlay" id="settings-overlay" onclick="toggleSettings()"></div>
+
+    <!-- Settings Sidebar -->
+    <div class="settings-sidebar" id="settings-sidebar">
+        <h2>Settings</h2>
+        <div id="settings-content">
+            <!-- Settings will be loaded here -->
+            <p>Loading settings...</p>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container" id="container">
+        <!-- Loading State -->
+        <div id="loading">
+            <div class="spinner"></div>
+            <p>Loading Dashboard...</p>
+        </div>
+
+        <!-- Content -->
+        <div id="content" style="display: none;">
+            <!-- Dashboard content will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Capacitor & App Scripts -->
+    <script type="module">
+        // Configuration
+        const API_BASE_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:5000' 
+            : 'https://your-backend-url.com'; // Replace with your deployed backend URL
+
+        // Global state
+        let dashboardData = null;
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                // Show loading
+                document.getElementById('loading').style.display = 'flex';
+                document.getElementById('content').style.display = 'none';
+
+                // Fetch data
+                const response = await fetch(`${API_BASE_URL}/api/dashboard/quick`);
+                if (!response.ok) throw new Error('Failed to fetch data');
+                
+                dashboardData = await response.json();
+
+                // Update timestamp
+                document.getElementById('timestamp').textContent = 
+                    `Last updated: ${new Date(dashboardData.timestamp).toLocaleTimeString()}`;
+
+                // Render dashboard
+                renderDashboard(dashboardData);
+
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+                // Load AI suggestions in background
+                loadAISuggestions();
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div class="setup-message">
+                        <p><strong>⚠️ Unable to connect to backend</strong></p>
+                        <p>Make sure your Flask server is running at:</p>
+                        <p><code>${API_BASE_URL}</code></p>
+                        <p style="margin-top: 10px;">
+                            <button class="btn" onclick="location.reload()">
+                                Try Again
+                            </button>
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        // Render dashboard
+        function renderDashboard(data) {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="grid">
+                    <!-- Weather Card -->
+                    <div class="card" id="weather-card">
+                        <h2><span class="icon">☀️</span> Weather</h2>
+                        ${renderWeather(data.weather)}
+                    </div>
+
+                    <!-- Garmin Card -->
+                    <div class="card" id="garmin-card">
+                        <h2><span class="icon">💪</span> Fitness</h2>
+                        ${renderGarmin(data.garmin)}
+                    </div>
+
+                    <!-- Today's Events -->
+                    <div class="card">
+                        <h2><span class="icon">📅</span> Today's Schedule</h2>
+                        <div class="scrollable-events">
+                            ${renderEvents(data.calendar.today)}
+                        </div>
+                    </div>
+
+                    <!-- AI Day Plan -->
+                    <div class="card">
+                        <h2>
+                            <span class="icon">🤖</span> Day Plan
+                            <button class="ai-refresh-btn" onclick="refreshAI('day-plan')">🔄</button>
+                        </h2>
+                        <div class="ai-content" id="ai-day-plan">Loading...</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render weather
+        function renderWeather(weather) {
+            if (weather.setup_message) {
+                return `<div class="setup-message">${weather.setup_message}</div>`;
+            }
+
+            return `
+                <div class="weather-main">
+                    <div>
+                        <div class="temperature">${Math.round(weather.temperature)}°</div>
+                        <div class="weather-description">${weather.description}</div>
+                    </div>
+                </div>
+                <div class="weather-details">
+                    <div class="weather-detail">
+                        <span>🌡️</span> Feels like: ${Math.round(weather.feels_like)}°C
+                    </div>
+                    <div class="weather-detail">
+                        <span>💧</span> Humidity: ${weather.humidity}%
+                    </div>
+                    <div class="weather-detail">
+                        <span>💨</span> Wind: ${weather.wind_speed} m/s
+                    </div>
+                    <div class="weather-detail">
+                        <span>🌡️</span> Pressure: ${weather.pressure} hPa
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render garmin
+        function renderGarmin(garmin) {
+            if (garmin.setup_message) {
+                return `<div class="setup-message">${garmin.setup_message}</div>`;
+            }
+
+            return `
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value">${garmin.sleep_score}</span>
+                        <div class="stat-label">Sleep Score</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">${Math.round(garmin.sleep_hours * 10) / 10}</span>
+                        <div class="stat-label">Sleep Hours</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">${garmin.training_load}</span>
+                        <div class="stat-label">Training Load</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">${garmin.steps || 'N/A'}</span>
+                        <div class="stat-label">Steps</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render events
+        function renderEvents(events) {
+            if (!events || events.length === 0) {
+                return '<div class="no-events">No events scheduled for today</div>';
+            }
+
+            return events.map(event => `
+                <div class="event-item">
+                    <div class="event-time">${formatTime(event.start)}</div>
+                    <div class="event-title">${event.summary}</div>
+                    ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Load AI suggestions
+        async function loadAISuggestions() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/ai/day-plan`);
+                const data = await response.json();
+                document.getElementById('ai-day-plan').textContent = data.suggestion;
+            } catch (error) {
+                document.getElementById('ai-day-plan').textContent = 'AI suggestions unavailable';
+            }
+        }
+
+        // Refresh dashboard
+        window.refreshDashboard = function() {
+            loadDashboard();
+        };
+
+        // Toggle settings
+        window.toggleSettings = function() {
+            const sidebar = document.getElementById('settings-sidebar');
+            const overlay = document.getElementById('settings-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        };
+
+        // Format time
+        function formatTime(datetime) {
+            if (!datetime) return '';
+            try {
+                const date = new Date(datetime);
+                return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            } catch {
+                return datetime;
+            }
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Dashboard app starting...');
+            loadDashboard();
+        });
+    </script>
+</body>
+</html>

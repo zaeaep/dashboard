@@ -1,0 +1,34 @@
+{
+  "appId": "com.dashboard.personal",
+  "appName": "Personal Dashboard",
+  "webDir": "mobile",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "http://localhost:5000",
+    "cleartext": true,
+    "allowNavigation": [
+      "*"
+    ]
+  },
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#f0f2f5",
+    "scrollEnabled": true,
+    "allowsLinkPreview": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "backgroundColor": "#667eea",
+      "showSpinner": true,
+      "iosSpinnerStyle": "small",
+      "spinnerColor": "#ffffff",
+      "splashFullScreen": true,
+      "splashImmersive": true
+    },
+    "LocalNotifications": {
+      "iconColor": "#667eea"
+    }
+  }
+}

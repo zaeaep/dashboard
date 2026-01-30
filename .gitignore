@@ -21,6 +21,13 @@ wheels/
 *.egg
 MANIFEST
 
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
 # Virtual Environment
 venv/
 .venv/
@@ -87,3 +94,13 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# iOS/Mobile App
+mobile/ios/App/Pods/
+mobile/ios/App/build/
+mobile/ios/App/*.xcworkspace
+mobile/ios/App/App.xcodeproj/xcuserdata/
+mobile/ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
+mobile/node_modules/
+mobile/www/
+mobile/.DS_Store
