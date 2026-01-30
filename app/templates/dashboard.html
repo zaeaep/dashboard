@@ -610,6 +610,82 @@
             height: 100%;
             background: rgba(0,0,0,0.7);
             z-index: 9999;
+            cursor: pointer;
+        }
+
+        /* Todo Notification Styles */
+        .todo-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            z-index: 10000;
+            text-align: center;
+            animation: bounceIn 0.5s;
+            max-width: 500px;
+            min-width: 400px;
+        }
+
+        .todo-notification h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .todo-notification p {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .todo-notification-time {
+            font-size: 1em !important;
+            color: #666 !important;
+            margin-bottom: 25px !important;
+            font-weight: normal !important;
+        }
+
+        .todo-notification-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .todo-notification-btn {
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            flex: 1;
+            max-width: 180px;
+        }
+
+        .todo-notification-btn.complete-btn {
+            background: #4caf50;
+            color: white;
+        }
+
+        .todo-notification-btn.complete-btn:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        .todo-notification-btn.dismiss-btn {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .todo-notification-btn.dismiss-btn:hover {
+            background: #e0e0e0;
+            transform: scale(1.05);
         }
 
         .ai-section {
@@ -1981,6 +2057,89 @@
 
         // Todo Functions
         let todos = [];
+        let notifiedTodos = new Set(); // Track which todos have been notified
+        let todoCheckInterval = null;
+
+        // Check for due todos every minute
+        function startTodoNotifications() {
+            // Check immediately
+            checkDueTodos();
+            
+            // Then check every 30 seconds
+            todoCheckInterval = setInterval(checkDueTodos, 30000);
+        }
+
+        function checkDueTodos() {
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes(); // Minutes since midnight
+            const todayStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+            
+            todos.forEach(todo => {
+                // Skip completed todos or already notified todos
+                if (todo.completed || notifiedTodos.has(todo.id)) {
+                    return;
+                }
+                
+                // Check if todo is for today and time matches (within 1 minute tolerance)
+                if (todo.date === todayStr && todo.time) {
+                    const [hours, minutes] = todo.time.split(':').map(Number);
+                    const todoTime = hours * 60 + minutes;
+                    
+                    // Show notification if current time is within 1 minute of todo time
+                    if (Math.abs(currentTime - todoTime) <= 1) {
+                        showTodoNotification(todo);
+                        notifiedTodos.add(todo.id);
+                    }
+                }
+            });
+        }
+
+        function showTodoNotification(todo) {
+            // Play notification sound
+            try {
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjOJ1fLTgjMGHGq+8OugUBATVrXv8bJmHAU2jdXy0IEzBhtpvfDuoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2EcBTWL1fLRgjMGG2m98O+hVRQTUbLv76thHAU1i9Xy0YIzBhtpvfDvoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2EcBTWL1fLRgjMGG2m98O+hVRQTUbLv76thHAU1i9Xy0YIzBhtpvfDvoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2EcBTWL1fLRgjMGG2m98O+hVRQTUbLv76thHAU1i9Xy0YIzBhtpvfDvoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2EcBTWL1fLRgjMGG2m98O+hVRQTUbLv76thHAU1i9Xy0YIzBhtpvfDvoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2EcBTWL1fLRgjMGG2m98O+hVRQTUbLv76thHAU1i9Xy0YIzBhtpvfDvoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2Ec');
+                audio.play().catch(() => {});
+            } catch (e) {}
+
+            // Create notification overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'notification-overlay';
+            overlay.onclick = closeTodoNotification;
+            
+            const notification = document.createElement('div');
+            notification.className = 'todo-notification';
+            notification.innerHTML = `
+                <h2>📋 Todo Reminder!</h2>
+                <p><strong>${todo.title}</strong></p>
+                <p class="todo-notification-time">📅 ${todo.date} ⏰ ${todo.time}</p>
+                <div class="todo-notification-actions">
+                    <button class="todo-notification-btn complete-btn" onclick="completeTodoFromNotification('${todo.id}')">
+                        ✓ Mark Complete
+                    </button>
+                    <button class="todo-notification-btn dismiss-btn" onclick="closeTodoNotification()">
+                        Dismiss
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(notification);
+        }
+
+        function closeTodoNotification() {
+            const overlay = document.querySelector('.notification-overlay');
+            const notification = document.querySelector('.todo-notification');
+            if (overlay) overlay.remove();
+            if (notification) notification.remove();
+        }
+
+        async function completeTodoFromNotification(todoId) {
+            // Close notification first
+            closeTodoNotification();
+            
+            // Toggle the todo as complete
+            await toggleTodo(todoId);
+        }
 
         async function refreshCalendarEvents() {
             try {
@@ -2021,6 +2180,11 @@
                 if (response.ok) {
                     todos = await response.json();
                     renderTodos();
+                    
+                    // Start checking for due todos
+                    if (!todoCheckInterval) {
+                        startTodoNotifications();
+                    }
                 }
             } catch (error) {
                 console.error('Error loading todos:', error);
@@ -2097,6 +2261,9 @@
                     
                     // Refresh only calendar events
                     refreshCalendarEvents();
+                    
+                    // Check if new todo is due immediately
+                    checkDueTodos();
                 } else {
                     alert('Failed to add todo. Please try again.');
                 }
@@ -2111,6 +2278,11 @@
             if (!todo) return;
 
             todo.completed = !todo.completed;
+            
+            // If unchecking a todo, remove it from notified set so it can notify again
+            if (!todo.completed) {
+                notifiedTodos.delete(todoId);
+            }
 
             try {
                 await fetch(`/api/todos/${todoId}`, {
