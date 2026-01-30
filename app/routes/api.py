@@ -1,6 +1,7 @@
 """
 API routes for the Personal Dashboard.
 """
+import os
 import json
 from datetime import datetime
 from flask import Blueprint, jsonify, render_template, request
@@ -120,14 +121,21 @@ def get_quick_data():
         
         logger.info("Quick data fetched successfully")
         
+        # Check if calendar is not configured
+        calendar_data = {
+            "today": today_events,
+            "upcoming": calendar_events
+        }
+        
+        # Add setup_required flag if calendar is empty and credentials missing
+        if not calendar_events and not os.path.exists(Config.CREDENTIALS_FILE):
+            calendar_data["setup_required"] = True
+        
         return jsonify({
             "timestamp": datetime.now().isoformat(),
             "weather": weather,
             "garmin": garmin,
-            "calendar": {
-                "today": today_events,
-                "upcoming": calendar_events
-            }
+            "calendar": calendar_data
         })
     
     except Exception as e:

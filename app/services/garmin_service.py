@@ -29,7 +29,7 @@ class GarminService:
         """
         if not self.email or not self.password:
             logger.warning("Garmin credentials not configured")
-            return self._get_fallback_data("Not configured")
+            return self._get_fallback_data("Not configured", "⚠️ Garmin not configured. Add your GARMIN_EMAIL and GARMIN_PASSWORD to .env file. This feature is optional.")
         
         try:
             from garminconnect import Garmin
@@ -67,11 +67,11 @@ class GarminService:
         
         except ImportError:
             logger.error("garminconnect library not installed (pip install garminconnect)")
-            return self._get_fallback_data("Library not installed")
+            return self._get_fallback_data("Library not installed", "⚠️ Garmin library not installed. Run: pip install garminconnect")
         
         except Exception as e:
             log_error(logger, 'Garmin', e)
-            return self._get_fallback_data("Connection failed")
+            return self._get_fallback_data("Connection failed", "⚠️ Could not connect to Garmin. Check your GARMIN_EMAIL and GARMIN_PASSWORD in .env file.")
     
     def _parse_sleep_data(self, sleep_data: Dict) -> tuple:
         """Extract sleep score and hours from sleep data"""
@@ -410,7 +410,7 @@ class GarminService:
             "recommendations": [f"Sleep analysis unavailable: {reason}"]
         }
     
-    def _get_fallback_data(self, reason: str) -> Dict[str, Any]:
+    def _get_fallback_data(self, reason: str, setup_message: str = None) -> Dict[str, Any]:
         """Return fallback data when Garmin is unavailable"""
         return {
             "sleep_score": reason,
@@ -419,5 +419,7 @@ class GarminService:
             "training_status": reason,
             "steps": "N/A",
             "calories": "N/A",
-            "heart_rate": "N/A"
+            "heart_rate": "N/A",
+            "setup_required": reason if reason != "N/A" else None,
+            "setup_message": setup_message
         }

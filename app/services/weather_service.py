@@ -75,9 +75,17 @@ class WeatherService:
     
     def _get_fallback_weather(self, reason: str = "Not configured") -> Dict[str, Any]:
         """Return fallback weather data when API is unavailable"""
+        setup_message = None
+        if reason == "Not configured":
+            setup_message = "⚠️ Weather API not configured. Get a free API key from https://openweathermap.org/api and add it to your .env file as WEATHER_API_KEY"
+        elif "API key" in reason:
+            setup_message = "⚠️ Weather API key invalid. Check your WEATHER_API_KEY in .env file. Note: New keys can take 1-2 hours to activate."
+        
         return {
             "temperature": 15,
             "feels_like": 13,
+            "setup_required": reason,
+            "setup_message": setup_message,
             "description": reason.lower(),
             "humidity": 60,
             "wind_speed": 3.5,

@@ -675,6 +675,35 @@
             text-align: center;
         }
 
+        /* Setup Message Styles */
+        .setup-message {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffe082 100%);
+            border-left: 4px solid #ffa726;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+            color: #333;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .setup-message p {
+            margin: 5px 0;
+        }
+
+        .setup-message strong {
+            color: #e65100;
+        }
+
+        .setup-message a {
+            color: #1976d2;
+            text-decoration: underline;
+        }
+
+        .setup-message a:hover {
+            color: #0d47a1;
+        }
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -1615,28 +1644,61 @@
 
                 // Update weather
                 if (quickData.weather && !quickData.weather.error) {
-                    document.getElementById('temperature').textContent = 
-                        `${Math.round(quickData.weather.temperature)}°`;
-                    document.getElementById('weather-description').textContent = 
-                        quickData.weather.description.charAt(0).toUpperCase() + quickData.weather.description.slice(1);
-                    document.getElementById('feels-like').textContent = 
-                        `${Math.round(quickData.weather.feels_like)}°C`;
-                    document.getElementById('humidity').textContent = 
-                        `${quickData.weather.humidity}%`;
-                    document.getElementById('wind').textContent = 
-                        `${quickData.weather.wind_speed} m/s`;
+                    if (quickData.weather.setup_message) {
+                        // Show setup instructions
+                        document.getElementById('weather-section').innerHTML = `
+                            <h2><span class="icon">☀️</span> Weather</h2>
+                            <div class="setup-message">
+                                <p>${quickData.weather.setup_message}</p>
+                                <p style="margin-top: 10px; font-size: 0.9em;">
+                                    <strong>Setup Steps:</strong><br>
+                                    1. Get a free API key from <a href="https://openweathermap.org/api" target="_blank">OpenWeatherMap</a><br>
+                                    2. Add to .env file: WEATHER_API_KEY=your_key<br>
+                                    3. Restart the dashboard
+                                </p>
+                            </div>
+                        `;
+                    } else {
+                        document.getElementById('temperature').textContent = 
+                            `${Math.round(quickData.weather.temperature)}°`;
+                        document.getElementById('weather-description').textContent = 
+                            quickData.weather.description.charAt(0).toUpperCase() + quickData.weather.description.slice(1);
+                        document.getElementById('feels-like').textContent = 
+                            `${Math.round(quickData.weather.feels_like)}°C`;
+                        document.getElementById('humidity').textContent = 
+                            `${quickData.weather.humidity}%`;
+                        document.getElementById('wind').textContent = 
+                            `${quickData.weather.wind_speed} m/s`;
+                    }
                 }
 
                 // Update Garmin data
                 if (quickData.garmin) {
-                    document.getElementById('sleep-score').textContent = 
-                        quickData.garmin.sleep_score;
-                    document.getElementById('sleep-hours').textContent = 
-                        `${Math.round(quickData.garmin.sleep_hours * 10) / 10} hrs`;
-                    document.getElementById('training-load').textContent = 
-                        quickData.garmin.training_load;
-                    document.getElementById('training-status').textContent = 
-                        quickData.garmin.training_status;
+                    if (quickData.garmin.setup_message) {
+                        // Show setup instructions
+                        document.getElementById('garmin-section').innerHTML = `
+                            <h2><span class="icon">💪</span> Garmin Fitness</h2>
+                            <div class="setup-message">
+                                <p>${quickData.garmin.setup_message}</p>
+                                <p style="margin-top: 10px; font-size: 0.9em;">
+                                    <strong>Setup Steps (Optional):</strong><br>
+                                    1. Add to .env file:<br>
+                                    &nbsp;&nbsp;&nbsp;GARMIN_EMAIL=your_email<br>
+                                    &nbsp;&nbsp;&nbsp;GARMIN_PASSWORD=your_password<br>
+                                    2. Restart the dashboard
+                                </p>
+                            </div>
+                        `;
+                    } else {
+                        document.getElementById('sleep-score').textContent = 
+                            quickData.garmin.sleep_score;
+                        document.getElementById('sleep-hours').textContent = 
+                            `${Math.round(quickData.garmin.sleep_hours * 10) / 10} hrs`;
+                        document.getElementById('training-load').textContent = 
+                            quickData.garmin.training_load;
+                        document.getElementById('training-status').textContent = 
+                            quickData.garmin.training_status;
+                    }
                 }
 
                 // Update today's events
@@ -1650,6 +1712,20 @@
                             ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
                         </div>
                     `).join('');
+                } else if (quickData.calendar.setup_required) {
+                    todayEventsDiv.innerHTML = `
+                        <div class="setup-message">
+                            <p>⚠️ <strong>Google Calendar Not Configured</strong></p>
+                            <p style="margin-top: 10px; font-size: 0.9em;">
+                                <strong>Setup Steps:</strong><br>
+                                1. Visit <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a><br>
+                                2. Create a project & enable Calendar API<br>
+                                3. Create OAuth 2.0 credentials (Desktop app)<br>
+                                4. Download as credentials.json to project root<br>
+                                5. Restart dashboard - browser will open for authentication
+                            </p>
+                        </div>
+                    `;
                 } else {
                     todayEventsDiv.innerHTML = '<div class="no-events">No events scheduled for today</div>';
                 }

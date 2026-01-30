@@ -33,7 +33,7 @@ class AIService:
         """
         if not self.api_key:
             logger.warning("AI API key not configured")
-            return "AI suggestions unavailable. Please configure OPEN_WEB_UI_API_KEY."
+            return "⚠️ **AI Not Configured**\n\nTo enable AI suggestions:\n1. Get an API key from your Open Web UI instance\n2. Add it to your .env file as OPEN_WEB_UI_API_KEY\n3. Restart the dashboard\n\nThis feature is optional - other widgets will continue to work!"
         
         url = f"{self.base_url}{self.endpoint}"
         

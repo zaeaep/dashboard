@@ -63,6 +63,7 @@ class CalendarService:
         """
         if not os.path.exists(self.credentials_file):
             logger.warning(f"{self.credentials_file} not found - Google Calendar disabled")
+            logger.info("To enable Google Calendar: Visit https://console.cloud.google.com, create a project, enable Calendar API, download credentials.json")
             return []
         
         try:
