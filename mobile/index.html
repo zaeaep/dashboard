@@ -387,6 +387,108 @@
             min-height: 44px;
         }
 
+        /* Todo Notification Styles */
+        .notification-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            cursor: pointer;
+        }
+
+        .todo-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            z-index: 10000;
+            text-align: center;
+            animation: bounceIn 0.5s;
+            max-width: 90%;
+            width: 400px;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: translate(-50%, -50%) scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .todo-notification h2 {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .todo-notification p {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .todo-notification-time {
+            font-size: 0.95em !important;
+            color: #666 !important;
+            margin-bottom: 20px !important;
+            font-weight: normal !important;
+        }
+
+        .todo-notification-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .todo-notification-btn {
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 140px;
+            min-height: 44px;
+        }
+
+        .complete-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .complete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .dismiss-btn {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .dismiss-btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
         /* Settings Sidebar */
         .settings-btn {
             position: fixed;
@@ -561,6 +663,12 @@
 
                 // Load AI suggestions in background
                 loadAISuggestions();
+                
+                // Store dashboard data and start todo notifications
+                window.currentDashboardData = dashboardData;
+                if (dashboardData.todos && dashboardData.todos.length > 0) {
+                    startTodoNotifications();
+                }
 
             } catch (error) {
                 console.error('Error loading dashboard:', error);
@@ -723,6 +831,102 @@
                 return datetime;
             }
         }
+
+        // Todo Notification Functions
+        let notifiedTodos = new Set();
+        let todoCheckInterval = null;
+
+        function startTodoNotifications() {
+            // Check immediately
+            checkDueTodos();
+            
+            // Then check every 30 seconds
+            if (todoCheckInterval) {
+                clearInterval(todoCheckInterval);
+            }
+            todoCheckInterval = setInterval(checkDueTodos, 30000);
+        }
+
+        function checkDueTodos() {
+            // Get todos from the dashboard data if available
+            if (!window.currentDashboardData || !window.currentDashboardData.todos) {
+                return;
+            }
+
+            const todos = window.currentDashboardData.todos;
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+            const todayStr = now.toISOString().split('T')[0];
+            
+            todos.forEach(todo => {
+                if (todo.completed || notifiedTodos.has(todo.id)) {
+                    return;
+                }
+                
+                if (todo.date === todayStr && todo.time) {
+                    const [hours, minutes] = todo.time.split(':').map(Number);
+                    const todoTime = hours * 60 + minutes;
+                    
+                    if (Math.abs(currentTime - todoTime) <= 1) {
+                        showTodoNotification(todo);
+                        notifiedTodos.add(todo.id);
+                    }
+                }
+            });
+        }
+
+        function showTodoNotification(todo) {
+            try {
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjOJ1fLTgjMGHGq+8OugUBATVrXv8bJmHAU2jdXy0IEzBhtpvfDuoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2EcBTWL1fLRgjMGG2m98O+hVRQTUbLv76thHAU1i9Xy0YIzBhtpvfDvoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2EcBTWL1fLRgjMGG2m98O+hVRQTUbLv76thHAU1i9Xy0YIzBhtpvfDvoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2EcBTWL1fLRgjMGG2m98O+hVRQTUbLv76thHAU1i9Xy0YIzBhtpvfDvoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2EcBTWL1fLRgjMGG2m98O+hVRQTUbLv76thHAU1i9Xy0YIzBhtpvfDvoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2EcBTWL1fLRgjMGG2m98O+hVRQTUbLv76thHAU1i9Xy0YIzBhtpvfDvoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2Ec');
+                audio.play().catch(() => {});
+            } catch (e) {}
+
+            const overlay = document.createElement('div');
+            overlay.className = 'notification-overlay';
+            overlay.onclick = closeTodoNotification;
+            
+            const notification = document.createElement('div');
+            notification.className = 'todo-notification';
+            notification.innerHTML = `
+                <h2>📋 Todo Reminder!</h2>
+                <p><strong>${todo.title}</strong></p>
+                <p class="todo-notification-time">📅 ${todo.date} ⏰ ${todo.time}</p>
+                <div class="todo-notification-actions">
+                    <button class="todo-notification-btn complete-btn" onclick="completeTodoFromNotification('${todo.id}')">
+                        ✓ Mark Complete
+                    </button>
+                    <button class="todo-notification-btn dismiss-btn" onclick="closeTodoNotification()">
+                        Dismiss
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(notification);
+        }
+
+        window.closeTodoNotification = function() {
+            const overlay = document.querySelector('.notification-overlay');
+            const notification = document.querySelector('.todo-notification');
+            if (overlay) overlay.remove();
+            if (notification) notification.remove();
+        };
+
+        window.completeTodoFromNotification = async function(todoId) {
+            closeTodoNotification();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/todos/${todoId}/toggle`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    loadDashboard();
+                }
+            } catch (error) {
+                console.error('Error completing todo:', error);
+            }
+        };
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', () => {
