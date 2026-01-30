@@ -670,6 +670,9 @@
                     startTodoNotifications();
                 }
 
+                // Load health data
+                await loadMobileHealthData();
+
             } catch (error) {
                 console.error('Error loading dashboard:', error);
                 document.getElementById('loading').innerHTML = `
@@ -702,6 +705,12 @@
                     <div class="card" id="garmin-card">
                         <h2><span class="icon">💪</span> Fitness</h2>
                         ${renderGarmin(data.garmin)}
+                    </div>
+
+                    <!-- Health Card -->
+                    <div class="card" id="health-card">
+                        <h2><span class="icon">❤️</span> Health</h2>
+                        ${renderHealth()}
                     </div>
 
                     <!-- Today's Events -->
@@ -795,6 +804,97 @@
                     ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
                 </div>
             `).join('');
+        }
+
+        // Render health
+        function renderHealth() {
+            return `
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 600;">⚡ Energy Level</span>
+                        <span id="mobile-energy-value" style="font-size: 1.5em; font-weight: bold; color: var(--primary-color);">5</span>
+                    </div>
+                    <input 
+                        type="range" 
+                        id="mobile-energy-slider" 
+                        min="0" 
+                        max="10" 
+                        value="5" 
+                        style="width: 100%; height: 10px; border-radius: 5px; background: linear-gradient(to right, #ff6b6b 0%, #feca57 25%, #48dbfb 50%, #1dd1a1 75%, #10ac84 100%); outline: none;"
+                        oninput="updateMobileEnergy(this.value)"
+                    />
+                    <div id="mobile-energy-desc" style="text-align: center; color: #666; font-style: italic;">Average (normal)</div>
+                    
+                    <div style="margin-top: 10px;">
+                        <input 
+                            type="text" 
+                            id="mobile-symptom-input" 
+                            placeholder="Log symptoms..." 
+                            style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 10px;"
+                        />
+                        <button 
+                            onclick="saveMobileHealth()" 
+                            style="width: 100%; background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 1em;"
+                        >
+                            💾 Save Health Status
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Mobile health tracking
+        const mobileEnergyDescriptions = [
+            "Very Low (exhausted)", "Low (fatigued)", "Below Average (tired)",
+            "Moderate (okay)", "Average (normal)", "Good (energetic)",
+            "Very Good (vibrant)", "Great (highly energized)", "Excellent (peak energy)",
+            "Outstanding (extremely energized)", "Maximum (unstoppable)"
+        ];
+
+        window.updateMobileEnergy = function(value) {
+            document.getElementById('mobile-energy-value').textContent = value;
+            document.getElementById('mobile-energy-desc').textContent = mobileEnergyDescriptions[parseInt(value)];
+        };
+
+        window.saveMobileHealth = async function() {
+            const energyLevel = document.getElementById('mobile-energy-slider').value;
+            const symptoms = document.getElementById('mobile-symptom-input').value.trim();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/health`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        energy_level: parseInt(energyLevel),
+                        symptoms: symptoms || null
+                    })
+                });
+                
+                if (response.ok) {
+                    document.getElementById('mobile-symptom-input').value = '';
+                    alert('✓ Health status saved!');
+                    await loadMobileHealthData();
+                } else {
+                    alert('Failed to save health data');
+                }
+            } catch (error) {
+                console.error('Error saving health:', error);
+                alert('Failed to save health data');
+            }
+        };
+
+        async function loadMobileHealthData() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/health`);
+                if (response.ok) {
+                    const health = await response.json();
+                    const energyLevel = health.energy_level || 5;
+                    document.getElementById('mobile-energy-slider').value = energyLevel;
+                    updateMobileEnergy(energyLevel);
+                }
+            } catch (error) {
+                console.error('Error loading health:', error);
+            }
         }
 
         // Load AI suggestions

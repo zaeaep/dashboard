@@ -33,6 +33,9 @@ SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 # CALENDAR_FILTER = ["Work", "Personal", "john.doe@gmail.com"]
 CALENDAR_FILTER = []  # Empty = include all calendars
 
+# Health data file
+HEALTH_DATA_FILE = 'health_data.json'
+
 # Chat completion function (imported from your existing code)
 def get_ai_suggestion(prompt):
     """Get AI suggestions using the Open Web UI API"""
@@ -76,6 +79,60 @@ def get_ai_suggestion(prompt):
     except Exception as e:
         print(f"⚠️  LLM error: {str(e)}")
         return f"AI suggestions error: {str(e)}"
+
+
+def get_health_data():
+    """Get current health data from file"""
+    if not os.path.exists(HEALTH_DATA_FILE):
+        # Return default health data
+        return {
+            'energy_level': 5,
+            'symptoms': [],
+            'last_updated': None
+        }
+    
+    try:
+        with open(HEALTH_DATA_FILE, 'r') as f:
+            data = json.load(f)
+            # Clean up old symptoms (older than 7 days)
+            if 'symptoms' in data:
+                cutoff_date = (datetime.now() - timedelta(days=7)).isoformat()
+                data['symptoms'] = [s for s in data['symptoms'] if s.get('timestamp', '') > cutoff_date]
+            return data
+    except Exception as e:
+        print(f"Error reading health data: {e}")
+        return {'energy_level': 5, 'symptoms': [], 'last_updated': None}
+
+
+def save_health_data(energy_level, symptoms=None):
+    """Save health data to file"""
+    try:
+        # Get existing data
+        health_data = get_health_data()
+        
+        # Update energy level
+        if energy_level is not None:
+            health_data['energy_level'] = int(energy_level)
+        
+        # Add new symptom if provided
+        if symptoms:
+            if 'symptoms' not in health_data:
+                health_data['symptoms'] = []
+            health_data['symptoms'].append({
+                'description': symptoms,
+                'timestamp': datetime.now().isoformat()
+            })
+        
+        health_data['last_updated'] = datetime.now().isoformat()
+        
+        # Save to file
+        with open(HEALTH_DATA_FILE, 'w') as f:
+            json.dump(health_data, f, indent=2)
+        
+        return health_data
+    except Exception as e:
+        print(f"Error saving health data: {e}")
+        return None
 
 
 def get_google_calendar_events():
@@ -451,11 +508,32 @@ def get_context_data():
     calendar_events = get_google_calendar_events()
     weather = get_weather()
     garmin = get_garmin_data()
+    health = get_health_data()
     
     mez = ZoneInfo("Europe/Berlin")
     today = datetime.now(mez).date()
     today_events = [e for e in calendar_events 
                    if datetime.fromisoformat(e['start'].replace('Z', '+00:00').split('T')[0]).date() == today]
+    
+    # Format health data for context
+    energy_level = health.get('energy_level', 5)
+    energy_description = [
+        "very low (exhausted)",
+        "low (fatigued)", 
+        "below average (tired)",
+        "moderate (okay)",
+        "average (normal)",
+        "good (energetic)",
+        "very good (vibrant)",
+        "great (highly energized)",
+        "excellent (peak energy)",
+        "outstanding (extremely energized)",
+        "maximum (unstoppable)"
+    ][energy_level]
+    
+    recent_symptoms = health.get('symptoms', [])[-5:]  # Last 5 symptoms
+    symptoms_text = "\n    ".join([f"- {s['description']} (recorded {datetime.fromisoformat(s['timestamp']).strftime('%Y-%m-%d %H:%M')})"
+                                     for s in recent_symptoms]) if recent_symptoms else "None recorded"
     
     context = f"""
     Today's date: {datetime.now().strftime('%Y-%m-%d %A')}
@@ -465,6 +543,11 @@ def get_context_data():
     Sleep Score: {garmin.get('sleep_score', 'N/A')}
     Sleep Hours: {garmin.get('sleep_hours', 'N/A')}
     Training Status: {garmin.get('training_status', 'N/A')}
+    
+    HEALTH STATUS (IMPORTANT - Consider this for all suggestions):
+    Energy Level: {energy_level}/10 - {energy_description}
+    Recent Symptoms:
+    {symptoms_text}
     
     Today's Calendar Events:
     {json.dumps(today_events, indent=2) if today_events else "No events scheduled"}
@@ -515,6 +598,35 @@ def get_nutrition():
         return jsonify({"suggestion": nutrition})
     except Exception as e:
         return jsonify({"error": str(e), "suggestion": f"Error generating nutrition advice: {str(e)}"}), 200
+
+
+@app.route('/api/health', methods=['GET'])
+def get_health():
+    """Get current health data"""
+    try:
+        health_data = get_health_data()
+        return jsonify(health_data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/health', methods=['POST'])
+def update_health():
+    """Update health data"""
+    try:
+        from flask import request
+        data = request.json
+        energy_level = data.get('energy_level')
+        symptoms = data.get('symptoms')
+        
+        health_data = save_health_data(energy_level, symptoms)
+        
+        if health_data:
+            return jsonify(health_data)
+        else:
+            return jsonify({"error": "Failed to save health data"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':
