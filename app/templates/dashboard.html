@@ -1,0 +1,2859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .timestamp {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+            position: relative;
+            overflow: visible;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card.clickable {
+            cursor: pointer;
+        }
+
+        .card.clickable:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            font-size: 1.5em;
+        }
+
+        .weather-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .temp {
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .weather-details {
+            flex: 1;
+        }
+
+        .weather-detail {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .stat-item {
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .event-item {
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .event-time {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .event-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .event-description {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .scrollable-events {
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 10px;
+            margin-top: 10px;
+        }
+
+        .scrollable-events::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .scrollable-events::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+            margin: 5px 0;
+        }
+
+        .scrollable-events::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+            border: 2px solid #f1f1f1;
+        }
+
+        .scrollable-events::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+
+        /* For Firefox */
+        .scrollable-events {
+            scrollbar-width: thin;
+            scrollbar-color: #667eea #f1f1f1;
+        }
+
+        .time-range-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .time-range-btn {
+            background: #f8f9ff;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .time-range-btn:hover {
+            background: #e8e9ff;
+            transform: translateY(-2px);
+        }
+
+        .time-range-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .ai-refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.85em;
+            margin-left: 10px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .ai-refresh-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .ai-refresh-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .ai-section h2 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Todo Styles */
+        .todo-form {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .todo-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 10px;
+            transition: border-color 0.3s;
+        }
+
+        .todo-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .todo-form-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .todo-date-input, .todo-time-input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: border-color 0.3s;
+        }
+
+        .todo-date-input:focus, .todo-time-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .add-todo-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .add-todo-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .todo-item {
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+
+        .todo-item:hover {
+            background: #e8e9ff;
+            transform: translateX(5px);
+        }
+
+        .todo-item.completed {
+            opacity: 0.6;
+            border-left-color: #4caf50;
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+        }
+
+        .todo-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .todo-content {
+            flex: 1;
+        }
+
+        .todo-text {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .todo-datetime {
+            color: #667eea;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .todo-delete-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .todo-delete-btn:hover {
+            background: #ff5252;
+            transform: scale(1.05);
+        }
+
+        /* Timer Styles */
+        .timer-form {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .timer-name-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 10px;
+            transition: border-color 0.3s;
+        }
+
+        .timer-name-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .timer-form-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .timer-input-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .timer-input-group label {
+            font-size: 0.85em;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .timer-number-input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1.1em;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        .timer-number-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .start-timer-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .start-timer-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .timer-display {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .timer-name-display {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .timer-countdown {
+            font-size: 4em;
+            font-weight: bold;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .timer-countdown.warning {
+            color: #ff9800;
+            animation: pulse 1s infinite;
+        }
+
+        .timer-countdown.critical {
+            color: #ff5252;
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .timer-control-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .timer-control-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .timer-control-btn.stop-btn {
+            background: #ff6b6b;
+        }
+
+        .timer-control-btn.stop-btn:hover {
+            background: #ff5252;
+        }
+
+        .timer-progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .timer-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+            border-radius: 5px;
+        }
+
+        /* Timer Notification Modal */
+        .timer-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            z-index: 10000;
+            text-align: center;
+            animation: bounceIn 0.5s;
+            max-width: 500px;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .timer-notification h2 {
+            color: #4caf50;
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .timer-notification p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .timer-notification button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .timer-notification button:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        .notification-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+        }
+
+        .ai-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: visible;
+        }
+
+        .ai-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .ai-content {
+            line-height: 1.8;
+            color: #444;
+            white-space: pre-wrap;
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: white;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .no-events {
+            color: #999;
+            font-style: italic;
+            padding: 15px;
+            text-align: center;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 20px;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: white;
+        }
+
+        .close {
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            line-height: 1;
+        }
+
+        .close:hover {
+            transform: scale(1.2);
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .detail-item {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #e8e9ff;
+            transition: all 0.3s;
+        }
+
+        .detail-item:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+        }
+
+        .detail-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            color: #667eea;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .detail-section {
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 15px;
+        }
+
+        .detail-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .click-hint {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 10px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* Sleep Stage Bar */
+        .sleep-stage-bar {
+            display: flex;
+            height: 40px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stage-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .stage-segment:hover {
+            filter: brightness(1.2);
+            transform: scaleY(1.1);
+        }
+
+        .stage-deep { background: #667eea; }
+        .stage-light { background: #a8b5f5; }
+        .stage-rem { background: #764ba2; }
+        .stage-awake { background: #ff6b6b; }
+
+        .sleep-trend-indicator {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .trend-improving { background: #4caf50; color: white; }
+        .trend-declining { background: #ff9800; color: white; }
+        .trend-stable { background: #2196f3; color: white; }
+
+        .consistency-meter {
+            height: 20px;
+            background: #e8e9ff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .consistency-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+
+        .weekly-chart {
+            margin: 20px 0;
+        }
+
+        .chart-bar-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            height: 200px;
+            padding: 10px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            min-width: 40px;
+            transition: all 0.3s;
+        }
+
+        .chart-bar:hover {
+            filter: brightness(1.2);
+            transform: scaleY(1.05);
+        }
+
+        .chart-bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8em;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .chart-bar-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9em;
+        }
+
+        .recommendation-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8f9ff;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        /* Event Styles */
+        .event-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #e8e9ff;
+            color: #667eea;
+            border-radius: 15px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin: 2px;
+        }
+
+        .event-type-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .type-race { background: #ff6b6b; }
+        .type-group_training { background: #4ecdc4; }
+        .type-meetup { background: #ffa502; }
+        .type-workshop { background: #9b59b6; }
+        .type-competition { background: #e74c3c; }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .event-date-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e8e9ff;
+            border-radius: 25px;
+            font-size: 1em;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            background: #f8f9ff;
+            border: 2px solid #e8e9ff;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #667eea;
+            transition: all 0.3s;
+        }
+
+        .filter-chip:hover {
+            background: #e8e9ff;
+            transform: translateY(-2px);
+        }
+
+        .filter-chip.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .event-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .event-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Settings Sidebar */
+        .settings-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            z-index: 999;
+        }
+
+        .settings-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .settings-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.3);
+            transition: right 0.3s ease;
+            z-index: 1001;
+            overflow-y: auto;
+        }
+
+        .settings-sidebar.active {
+            right: 0;
+        }
+
+        .settings-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-header h2 {
+            margin: 0;
+            color: white;
+        }
+
+        .close-settings {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .close-settings:hover {
+            transform: rotate(90deg);
+        }
+
+        .settings-content {
+            padding: 25px;
+        }
+
+        .settings-section {
+            margin-bottom: 30px;
+        }
+
+        .settings-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .widget-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #e8e9ff;
+            transition: all 0.3s;
+        }
+
+        .widget-toggle:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .widget-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #ccc;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #667eea;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: left 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active .toggle-slider {
+            left: 33px;
+        }
+
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 1000;
+        }
+
+        .settings-overlay.active {
+            display: block;
+        }
+
+        .color-picker-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            transition: background 0.2s;
+        }
+
+        .color-picker-item:hover {
+            background: #e9ecef;
+        }
+
+        .color-picker-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95em;
+            color: #333;
+        }
+
+        .color-input {
+            width: 50px;
+            height: 35px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .color-input:hover {
+            border-color: #667eea;
+        }
+
+        .widget-hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Settings Button -->
+    <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
+
+    <!-- Settings Overlay -->
+    <div class="settings-overlay" id="settingsOverlay" onclick="closeSettings()"></div>
+
+    <!-- Settings Sidebar -->
+    <div class="settings-sidebar" id="settingsSidebar">
+        <div class="settings-header">
+            <h2>⚙️ Dashboard Settings</h2>
+            <button class="close-settings" onclick="closeSettings()">&times;</button>
+        </div>
+        <div class="settings-content">
+            <div class="settings-section">
+                <h3>Visible Widgets</h3>
+                <p style="color: #666; font-size: 0.9em; margin-bottom: 15px;">Toggle widgets on/off. Your preferences will be saved automatically.</p>
+                
+                <div class="widget-toggle" data-widget="weather-card" onclick="toggleWidget('weather-card')">
+                    <div class="widget-label">
+                        <span>🌤️</span>
+                        <span>Weather</span>
+                    </div>
+                    <div class="toggle-switch active">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="widget-toggle" data-widget="sleep-card" onclick="toggleWidget('sleep-card')">
+                    <div class="widget-label">
+                        <span>😴</span>
+                        <span>Sleep Data</span>
+                    </div>
+                    <div class="toggle-switch active">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="widget-toggle" data-widget="training-card" onclick="toggleWidget('training-card')">
+                    <div class="widget-label">
+                        <span>💪</span>
+                        <span>Training Status</span>
+                    </div>
+                    <div class="toggle-switch active">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="widget-toggle" data-widget="today-events-section" onclick="toggleWidget('today-events-section')">
+                    <div class="widget-label">
+                        <span>📅</span>
+                        <span>Today's Schedule</span>
+                    </div>
+                    <div class="toggle-switch active">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="widget-toggle" data-widget="ai-day-plan" onclick="toggleWidget('ai-day-plan')">
+                    <div class="widget-label">
+                        <span>🤖</span>
+                        <span>AI Day Plan</span>
+                    </div>
+                    <div class="toggle-switch active">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="widget-toggle" data-widget="ai-freetime" onclick="toggleWidget('ai-freetime')">
+                    <div class="widget-label">
+                        <span>🎯</span>
+                        <span>Free Time Suggestions</span>
+                    </div>
+                    <div class="toggle-switch active">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="widget-toggle" data-widget="ai-nutrition" onclick="toggleWidget('ai-nutrition')">
+                    <div class="widget-label">
+                        <span>🥗</span>
+                        <span>Nutrition Recommendations</span>
+                    </div>
+                    <div class="toggle-switch active">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="widget-toggle" data-widget="upcoming-events-section" onclick="toggleWidget('upcoming-events-section')">
+                    <div class="widget-label">
+                        <span>📆</span>
+                        <span>Upcoming Events</span>
+                    </div>
+                    <div class="toggle-switch active">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="widget-toggle" data-widget="local-events-section" onclick="toggleWidget('local-events-section')">
+                    <div class="widget-label">
+                        <span>🎪</span>
+                        <span>Local Events</span>
+                    </div>
+                    <div class="toggle-switch active">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="widget-toggle" data-widget="todo-section" onclick="toggleWidget('todo-section')">
+                    <div class="widget-label">
+                        <span>✅</span>
+                        <span>Todo List</span>
+                    </div>
+                    <div class="toggle-switch active">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="widget-toggle" data-widget="timer-section" onclick="toggleWidget('timer-section')">
+                    <div class="widget-label">
+                        <span>⏱️</span>
+                        <span>Timer</span>
+                    </div>
+                    <div class="toggle-switch active">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>🎨 Color Customization</h3>
+                <p style="color: #666; font-size: 0.9em; margin-bottom: 15px;">Customize the page background color.</p>
+                
+                <div class="color-picker-item">
+                    <input type="color" class="color-input" id="page-bg-color" value="#f0f2f5" onchange="changePageColor(this.value)">
+                    <div class="color-picker-label">
+                        <span>🖼️</span>
+                        <span>Page Background</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>Actions</h3>
+                <button class="refresh-btn" onclick="resetSettings()" style="width: 100%; margin-top: 10px;">🔄 Reset to Defaults</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>🌟 Personal Dashboard</h1>
+            <div class="timestamp" id="timestamp">Loading...</div>
+            <button class="refresh-btn" onclick="refreshDashboard()">🔄 Refresh Data</button>
+        </header>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <div>Loading your personalized dashboard...</div>
+        </div>
+
+        <div id="content" style="display: none;">
+            <!-- Top Row: Weather, Sleep, Training -->
+            <div class="grid">
+                <!-- Weather Card -->
+                <div class="card clickable" onclick="showWeatherDetails()" id="weather-card">
+                    <h2><span class="icon">🌤️</span> Weather</h2>
+                    <div class="weather-info">
+                        <div class="temp" id="temperature">--°</div>
+                        <div class="weather-details">
+                            <div class="weather-detail" id="weather-description">--</div>
+                            <div class="weather-detail">Feels like: <strong id="feels-like">--°C</strong></div>
+                            <div class="weather-detail">Humidity: <strong id="humidity">--%</strong></div>
+                            <div class="weather-detail">Wind: <strong id="wind">-- m/s</strong></div>
+                        </div>
+                    </div>
+                    <div class="click-hint">💡 Click for detailed weather forecast</div>
+                </div>
+
+                <!-- Sleep Card -->
+                <div class="card clickable" onclick="showSleepAnalysis()" id="sleep-card">
+                    <h2><span class="icon">😴</span> Sleep Data</h2>
+                    <div class="stat-item">
+                        <span class="stat-label">Sleep Score</span>
+                        <span class="stat-value" id="sleep-score">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Sleep Duration</span>
+                        <span class="stat-value" id="sleep-hours">-- hrs</span>
+                    </div>
+                    <div class="click-hint">💡 Click for detailed sleep analysis</div>
+                </div>
+
+                <!-- Training Card -->
+                <div class="card clickable" onclick="showTrainingDetails()" id="training-card">
+                    <h2><span class="icon">💪</span> Training Status</h2>
+                    <div class="stat-item">
+                        <span class="stat-label">Training Load</span>
+                        <span class="stat-value" id="training-load">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Status</span>
+                        <span class="stat-value" id="training-status">--</span>
+                    </div>
+                    <div class="click-hint">💡 Click for detailed fitness metrics</div>
+                </div>
+            </div>
+
+            <!-- Todo Manager -->
+            <div class="card" id="todo-section">
+                <h2><span class="icon">✅</span> Todo List</h2>
+                
+                <!-- Add Todo Form -->
+                <div class="todo-form">
+                    <input 
+                        type="text" 
+                        class="todo-input" 
+                        id="todo-title" 
+                        placeholder="What needs to be done?"
+                        onkeypress="if(event.key === 'Enter') addTodo()"
+                    />
+                    <div class="todo-form-row">
+                        <input 
+                            type="date" 
+                            class="todo-date-input" 
+                            id="todo-date" 
+                        />
+                        <input 
+                            type="time" 
+                            class="todo-time-input" 
+                            id="todo-time" 
+                            value="12:00"
+                        />
+                        <button class="add-todo-btn" onclick="addTodo()">
+                            ➕ Add Todo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Todo List -->
+                <div class="scrollable-events" id="todo-list">
+                    <div class="no-events">No todos yet. Add one above!</div>
+                </div>
+            </div>
+
+            <!-- Timer Section -->
+            <div class="card" id="timer-section">
+                <h2><span class="icon">⏱️</span> Countdown Timer</h2>
+                
+                <!-- Timer Setup Form -->
+                <div class="timer-form" id="timer-setup">
+                    <input 
+                        type="text" 
+                        class="timer-name-input" 
+                        id="timer-name" 
+                        placeholder="Timer name (e.g., Coffee Break, Study Session)"
+                        maxlength="50"
+                    />
+                    <div class="timer-form-row">
+                        <div class="timer-input-group">
+                            <label>Minutes</label>
+                            <input 
+                                type="number" 
+                                class="timer-number-input" 
+                                id="timer-minutes" 
+                                min="0" 
+                                max="999"
+                                value="25"
+                            />
+                        </div>
+                        <div class="timer-input-group">
+                            <label>Seconds</label>
+                            <input 
+                                type="number" 
+                                class="timer-number-input" 
+                                id="timer-seconds" 
+                                min="0" 
+                                max="59"
+                                value="0"
+                            />
+                        </div>
+                        <button class="start-timer-btn" onclick="startTimer()">
+                            ▶️ Start Timer
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Timer Display (hidden initially) -->
+                <div class="timer-display" id="timer-display" style="display: none;">
+                    <div class="timer-name-display" id="timer-name-display">Timer</div>
+                    <div class="timer-countdown" id="timer-countdown">00:00</div>
+                    <div class="timer-controls">
+                        <button class="timer-control-btn pause-btn" onclick="pauseTimer()" id="pause-btn">
+                            ⏸️ Pause
+                        </button>
+                        <button class="timer-control-btn resume-btn" onclick="resumeTimer()" id="resume-btn" style="display: none;">
+                            ▶️ Resume
+                        </button>
+                        <button class="timer-control-btn stop-btn" onclick="stopTimer()">
+                            ⏹️ Stop
+                        </button>
+                    </div>
+                    <div class="timer-progress-bar">
+                        <div class="timer-progress-fill" id="timer-progress"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar Events -->
+            <div class="card" id="today-events-section">
+                <h2><span class="icon">📅</span> Today's Schedule</h2>
+                <div class="scrollable-events" id="today-events">
+                    <div class="no-events">No events scheduled for today</div>
+                </div>
+            </div>
+
+            <!-- AI Suggestions -->
+            <div class="ai-section" id="ai-day-plan">
+                <h2>
+                    <span>🤖 Your Personalized Day Plan</span>
+                    <button class="ai-refresh-btn" onclick="refreshAISuggestion('day-plan')">
+                        🔄 Refresh
+                    </button>
+                </h2>
+                <div class="ai-content scrollable-events" id="day-plan">Loading AI suggestions...</div>
+            </div>
+
+            <div class="ai-section" id="ai-freetime">
+                <h2>
+                    <span>🎯 Free Time Suggestions</span>
+                    <button class="ai-refresh-btn" onclick="refreshAISuggestion('freetime')">
+                        🔄 Refresh
+                    </button>
+                </h2>
+                <div class="ai-content scrollable-events" id="freetime">Loading suggestions...</div>
+            </div>
+
+            <div class="ai-section" id="ai-nutrition">
+                <h2>
+                    <span>🥗 Nutrition Recommendations</span>
+                    <button class="ai-refresh-btn" onclick="refreshAISuggestion('nutrition')">
+                        🔄 Refresh
+                    </button>
+                </h2>
+                <div class="ai-content scrollable-events" id="nutrition">Loading nutrition advice...</div>
+            </div>
+
+            <!-- Upcoming Events -->
+            <div class="card" id="upcoming-events-section">
+                <h2><span class="icon">📆</span> Upcoming Events</h2>
+                <div class="time-range-selector">
+                    <button class="time-range-btn active" onclick="filterUpcomingEvents(7)">1 Week</button>
+                    <button class="time-range-btn" onclick="filterUpcomingEvents(30)">1 Month</button>
+                    <button class="time-range-btn" onclick="filterUpcomingEvents(60)">2 Months</button>
+                </div>
+                <div class="scrollable-events" id="upcoming-events">
+                    <div class="no-events">No upcoming events</div>
+                </div>
+            </div>
+
+            <!-- Local Events & Opportunities -->
+            <div class="card" id="local-events-section">
+                <h2><span class="icon">🎪</span> Local Events & Opportunities</h2>
+                
+                <!-- Search Input -->
+                <input 
+                    type="text" 
+                    class="filter-input" 
+                    id="events-search" 
+                    placeholder="🔍 Search events by keyword (e.g., running, race, cycling)..."
+                    onkeyup="searchLocalEvents()"
+                />
+                
+                <!-- Quick Filter Chips -->
+                <div class="filter-chips" id="filter-chips">
+                    <span class="filter-chip" onclick="toggleFilter('running')">🏃 Running</span>
+                    <span class="filter-chip" onclick="toggleFilter('cycling')">🚴 Cycling</span>
+                    <span class="filter-chip" onclick="toggleFilter('race')">🏆 Races</span>
+                    <span class="filter-chip" onclick="toggleFilter('training')">💪 Training</span>
+                    <span class="filter-chip" onclick="toggleFilter('meetup')">👥 Meetups</span>
+                    <span class="filter-chip" onclick="toggleFilter('workshop')">📚 Workshops</span>
+                </div>
+                
+                <!-- Events List -->
+                <div class="scrollable-events" id="local-events">
+                    <div class="no-events">Loading local events...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadDashboard() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('content').style.display = 'none';
+
+            try {
+                // Step 1: Load quick data first (calendar, weather, Garmin)
+                const quickResponse = await fetch('/api/dashboard/quick');
+                const quickData = await quickResponse.json();
+
+                // Update timestamp
+                document.getElementById('timestamp').textContent = 
+                    `Last updated: ${new Date(quickData.timestamp).toLocaleString()}`;
+
+                // Update weather
+                if (quickData.weather && !quickData.weather.error) {
+                    document.getElementById('temperature').textContent = 
+                        `${Math.round(quickData.weather.temperature)}°`;
+                    document.getElementById('weather-description').textContent = 
+                        quickData.weather.description.charAt(0).toUpperCase() + quickData.weather.description.slice(1);
+                    document.getElementById('feels-like').textContent = 
+                        `${Math.round(quickData.weather.feels_like)}°C`;
+                    document.getElementById('humidity').textContent = 
+                        `${quickData.weather.humidity}%`;
+                    document.getElementById('wind').textContent = 
+                        `${quickData.weather.wind_speed} m/s`;
+                }
+
+                // Update Garmin data
+                if (quickData.garmin) {
+                    document.getElementById('sleep-score').textContent = 
+                        quickData.garmin.sleep_score;
+                    document.getElementById('sleep-hours').textContent = 
+                        `${Math.round(quickData.garmin.sleep_hours * 10) / 10} hrs`;
+                    document.getElementById('training-load').textContent = 
+                        quickData.garmin.training_load;
+                    document.getElementById('training-status').textContent = 
+                        quickData.garmin.training_status;
+                }
+
+                // Update today's events
+                const todayEventsDiv = document.getElementById('today-events');
+                if (quickData.calendar.today && quickData.calendar.today.length > 0) {
+                    todayEventsDiv.innerHTML = quickData.calendar.today.map(event => `
+                        <div class="event-item">
+                            <div class="event-time">${formatTime(event.start)}</div>
+                            <div class="event-title">${event.summary}</div>
+                            ${event.calendar ? `<div class="event-description">📅 ${event.calendar}</div>` : ''}
+                            ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    todayEventsDiv.innerHTML = '<div class="no-events">No events scheduled for today</div>';
+                }
+
+                // Update upcoming events
+                const upcomingEventsDiv = document.getElementById('upcoming-events');
+                if (quickData.calendar.upcoming && quickData.calendar.upcoming.length > 0) {
+                    window.allUpcomingEvents = quickData.calendar.upcoming;
+                    filterUpcomingEvents(7);
+                } else {
+                    upcomingEventsDiv.innerHTML = '<div class="no-events">No upcoming events</div>';
+                }
+
+                // Show content immediately with quick data
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+                // Step 2: Load AI suggestions in background (show loading spinners)
+                showAILoadingState();
+                loadAISuggestions();
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                document.getElementById('loading').innerHTML = 
+                    `<div class="error">Error loading dashboard: ${error.message}</div>`;
+            }
+        }
+
+        function showAILoadingState() {
+            document.getElementById('day-plan').innerHTML = '🔄 Generating personalized suggestions...';
+            document.getElementById('freetime').innerHTML = '🔄 Analyzing free time activities...';
+            document.getElementById('nutrition').innerHTML = '🔄 Creating nutrition plan...';
+        }
+
+        async function loadAISuggestions() {
+            try {
+                // Load all AI suggestions in parallel
+                const [dayPlanRes, freetimeRes, nutritionRes] = await Promise.all([
+                    fetch('/api/ai/day-plan'),
+                    fetch('/api/ai/freetime'),
+                    fetch('/api/ai/nutrition')
+                ]);
+
+                const dayPlanData = await dayPlanRes.json();
+                const freetimeData = await freetimeRes.json();
+                const nutritionData = await nutritionRes.json();
+
+                document.getElementById('day-plan').textContent = dayPlanData.suggestion;
+                document.getElementById('freetime').textContent = freetimeData.suggestion;
+                document.getElementById('nutrition').textContent = nutritionData.suggestion;
+
+            } catch (error) {
+                console.error('Error loading AI suggestions:', error);
+                document.getElementById('day-plan').textContent = 
+                    'AI suggestions temporarily unavailable. Please refresh.';
+                document.getElementById('freetime').textContent = 
+                    'AI suggestions temporarily unavailable. Please refresh.';
+                document.getElementById('nutrition').textContent = 
+                    'AI suggestions temporarily unavailable. Please refresh.';
+            }
+
+            // Load todos
+            await loadTodos();
+
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('todo-date').value = today;
+        }
+
+        // Timer Functions
+        let timerInterval = null;
+        let timerSeconds = 0;
+        let totalSeconds = 0;
+        let isPaused = false;
+
+        function startTimer() {
+            const name = document.getElementById('timer-name').value.trim() || 'Timer';
+            const minutes = parseInt(document.getElementById('timer-minutes').value) || 0;
+            const seconds = parseInt(document.getElementById('timer-seconds').value) || 0;
+
+            totalSeconds = (minutes * 60) + seconds;
+
+            if (totalSeconds <= 0) {
+                alert('Please set a timer duration');
+                return;
+            }
+
+            timerSeconds = totalSeconds;
+            
+            // Hide setup, show display
+            document.getElementById('timer-setup').style.display = 'none';
+            document.getElementById('timer-display').style.display = 'block';
+            document.getElementById('timer-name-display').textContent = name;
+            
+            updateTimerDisplay();
+            runTimer();
+        }
+
+        function runTimer() {
+            timerInterval = setInterval(() => {
+                if (!isPaused) {
+                    timerSeconds--;
+                    updateTimerDisplay();
+
+                    if (timerSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        showTimerNotification();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            const countdownEl = document.getElementById('timer-countdown');
+            countdownEl.textContent = display;
+
+            // Add visual warnings
+            if (timerSeconds <= 10 && timerSeconds > 0) {
+                countdownEl.className = 'timer-countdown critical';
+            } else if (timerSeconds <= 60) {
+                countdownEl.className = 'timer-countdown warning';
+            } else {
+                countdownEl.className = 'timer-countdown';
+            }
+
+            // Update progress bar
+            const progress = ((totalSeconds - timerSeconds) / totalSeconds) * 100;
+            document.getElementById('timer-progress').style.width = progress + '%';
+        }
+
+        function pauseTimer() {
+            isPaused = true;
+            document.getElementById('pause-btn').style.display = 'none';
+            document.getElementById('resume-btn').style.display = 'inline-block';
+        }
+
+        function resumeTimer() {
+            isPaused = false;
+            document.getElementById('pause-btn').style.display = 'inline-block';
+            document.getElementById('resume-btn').style.display = 'none';
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            isPaused = false;
+            
+            // Show setup, hide display
+            document.getElementById('timer-setup').style.display = 'block';
+            document.getElementById('timer-display').style.display = 'none';
+            document.getElementById('pause-btn').style.display = 'inline-block';
+            document.getElementById('resume-btn').style.display = 'none';
+        }
+
+        function showTimerNotification() {
+            const name = document.getElementById('timer-name-display').textContent;
+            
+            // Play notification sound
+            try {
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjOJ1fLTgjMGHGq+8OugUBATVrXv8bJmHAU2jdXy0IEzBhtpvfDuoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2EcBTWL1fLRgjMGG2m98O+hVRQTUbLv76thHAU1i9Xy0YIzBhtpvfDvoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2EcBTWL1fLRgjMGG2m98O+hVRQTUbLv76thHAU1i9Xy0YIzBhtpvfDvoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2EcBTWL1fLRgjMGG2m98O+hVRQTUbLv76thHAU1i9Xy0YIzBhtpvfDvoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2EcBTWL1fLRgjMGG2m98O+hVRQTUbLv76thHAU1i9Xy0YIzBhtpvfDvoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2EcBTWL1fLRgjMGG2m98O+hVRQTUbLv76thHAU1i9Xy0YIzBhtpvfDvoVUUE1Gy7++rYRwFNYvV8tGCMwYbab3w76FVFBNRsu/vq2Ec');
+                audio.play().catch(() => {});
+            } catch (e) {}
+
+            // Create notification overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'notification-overlay';
+            
+            const notification = document.createElement('div');
+            notification.className = 'timer-notification';
+            notification.innerHTML = `
+                <h2>⏰ Time's Up!</h2>
+                <p><strong>${name}</strong> has finished!</p>
+                <button onclick="closeTimerNotification()">Got it!</button>
+            `;
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(notification);
+            
+            // Reset timer display
+            stopTimer();
+        }
+
+        function closeTimerNotification() {
+            const overlay = document.querySelector('.notification-overlay');
+            const notification = document.querySelector('.timer-notification');
+            if (overlay) overlay.remove();
+            if (notification) notification.remove();
+        }
+
+        function formatTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatDateTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+
+        function filterUpcomingEvents(days) {
+            if (!window.allUpcomingEvents || window.allUpcomingEvents.length === 0) {
+                return;
+            }
+
+            // Update button active state
+            document.querySelectorAll('.time-range-btn').forEach(btn => {
+                btn.classList.remove('active');
+                // Check if this button matches the days parameter
+                const btnText = btn.textContent.trim();
+                if ((days === 7 && btnText === '1 Week') ||
+                    (days === 30 && btnText === '1 Month') ||
+                    (days === 60 && btnText === '2 Months')) {
+                    btn.classList.add('active');
+                }
+            });
+
+            const now = new Date();
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() + days);
+
+            const filteredEvents = window.allUpcomingEvents.filter(event => {
+                const eventDate = new Date(event.start);
+                return eventDate <= cutoffDate;
+            });
+
+            const upcomingEventsDiv = document.getElementById('upcoming-events');
+            if (filteredEvents.length > 0) {
+                upcomingEventsDiv.innerHTML = filteredEvents.map(event => `
+                    <div class="event-item">
+                        <div class="event-time">${formatDateTime(event.start)}</div>
+                        <div class="event-title">${event.summary}</div>
+                        ${event.calendar ? `<div class="event-description">📅 ${event.calendar}</div>` : ''}
+                        ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
+                    </div>
+                `).join('');
+            } else {
+                upcomingEventsDiv.innerHTML = '<div class="no-events">No events in this time range</div>';
+            }
+        }
+
+        function refreshDashboard() {
+            loadDashboard();
+        }
+
+        // Todo Functions
+        let todos = [];
+
+        async function refreshCalendarEvents() {
+            try {
+                const response = await fetch('/api/dashboard/quick');
+                const quickData = await response.json();
+
+                // Update today's events
+                const todayEventsDiv = document.getElementById('today-events');
+                if (quickData.calendar.today && quickData.calendar.today.length > 0) {
+                    todayEventsDiv.innerHTML = quickData.calendar.today.map(event => `
+                        <div class="event-item">
+                            <div class="event-time">${formatTime(event.start)}</div>
+                            <div class="event-title">${event.summary}</div>
+                            ${event.calendar ? `<div class="event-description">📅 ${event.calendar}</div>` : ''}
+                            ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    todayEventsDiv.innerHTML = '<div class="no-events">No events scheduled for today</div>';
+                }
+
+                // Update upcoming events
+                const upcomingEventsDiv = document.getElementById('upcoming-events');
+                if (quickData.calendar.upcoming && quickData.calendar.upcoming.length > 0) {
+                    window.allUpcomingEvents = quickData.calendar.upcoming;
+                    filterUpcomingEvents(7);
+                } else {
+                    upcomingEventsDiv.innerHTML = '<div class="no-events">No upcoming events</div>';
+                }
+            } catch (error) {
+                console.error('Error refreshing calendar:', error);
+            }
+        }
+
+        async function loadTodos() {
+            try {
+                const response = await fetch('/api/todos');
+                if (response.ok) {
+                    todos = await response.json();
+                    renderTodos();
+                }
+            } catch (error) {
+                console.error('Error loading todos:', error);
+            }
+        }
+
+        function renderTodos() {
+            const todoList = document.getElementById('todo-list');
+            
+            if (todos.length === 0) {
+                todoList.innerHTML = '<div class="no-events">No todos yet. Add one above!</div>';
+                return;
+            }
+
+            todoList.innerHTML = todos.map(todo => `
+                <div class="todo-item ${todo.completed ? 'completed' : ''}" data-id="${todo.id}">
+                    <input 
+                        type="checkbox" 
+                        class="todo-checkbox" 
+                        ${todo.completed ? 'checked' : ''}
+                        onchange="toggleTodo('${todo.id}')"
+                    />
+                    <div class="todo-content">
+                        <div class="todo-text">${todo.title}</div>
+                        <div class="todo-datetime">
+                            📅 ${todo.date} ⏰ ${todo.time}
+                        </div>
+                    </div>
+                    <button class="todo-delete-btn" onclick="deleteTodo('${todo.id}')">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        async function addTodo() {
+            const title = document.getElementById('todo-title').value.trim();
+            const date = document.getElementById('todo-date').value;
+            const time = document.getElementById('todo-time').value;
+
+            if (!title) {
+                alert('Please enter a todo title');
+                return;
+            }
+
+            if (!date) {
+                alert('Please select a date');
+                return;
+            }
+
+            const todoData = {
+                title: title,
+                date: date,
+                time: time,
+                completed: false
+            };
+
+            try {
+                const response = await fetch('/api/todos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(todoData)
+                });
+
+                if (response.ok) {
+                    const newTodo = await response.json();
+                    todos.push(newTodo);
+                    renderTodos();
+                    
+                    // Clear form
+                    document.getElementById('todo-title').value = '';
+                    document.getElementById('todo-date').value = '';
+                    document.getElementById('todo-time').value = '12:00';
+                    
+                    // Refresh only calendar events
+                    refreshCalendarEvents();
+                } else {
+                    alert('Failed to add todo. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error adding todo:', error);
+                alert('Error adding todo. Please check console for details.');
+            }
+        }
+
+        async function toggleTodo(todoId) {
+            const todo = todos.find(t => t.id === todoId);
+            if (!todo) return;
+
+            todo.completed = !todo.completed;
+
+            try {
+                await fetch(`/api/todos/${todoId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ completed: todo.completed })
+                });
+                renderTodos();
+            } catch (error) {
+                console.error('Error updating todo:', error);
+                todo.completed = !todo.completed; // Revert on error
+                renderTodos();
+            }
+        }
+
+        async function deleteTodo(todoId) {
+            if (!confirm('Delete this todo?')) return;
+
+            try {
+                const response = await fetch(`/api/todos/${todoId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    todos = todos.filter(t => t.id !== todoId);
+                    renderTodos();
+                    // Refresh only calendar events
+                    refreshCalendarEvents();
+                }
+            } catch (error) {
+                console.error('Error deleting todo:', error);
+            }
+        }
+
+        async function refreshAISuggestion(type) {
+            const elementMap = {
+                'day-plan': 'day-plan',
+                'freetime': 'freetime',
+                'nutrition': 'nutrition'
+            };
+
+            const urlMap = {
+                'day-plan': '/api/ai/day-plan',
+                'freetime': '/api/ai/freetime',
+                'nutrition': '/api/ai/nutrition'
+            };
+
+            const elementId = elementMap[type];
+            const url = urlMap[type];
+            const element = document.getElementById(elementId);
+            
+            if (!element) return;
+
+            // Disable button and show loading
+            const button = event.target;
+            button.disabled = true;
+            button.textContent = '⏳ Loading...';
+            element.textContent = 'Generating new suggestions...';
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.suggestion) {
+                    element.textContent = data.suggestion;
+                } else {
+                    element.textContent = 'Error loading suggestion. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error refreshing AI suggestion:', error);
+                element.textContent = `Error: ${error.message}`;
+            } finally {
+                // Re-enable button
+                button.disabled = false;
+                button.textContent = '🔄 Refresh';
+            }
+        }
+
+        // Local Events functionality
+        let allLocalEvents = [];
+        let activeFilters = [];
+
+        async function loadLocalEvents() {
+            try {
+                const response = await fetch('/api/events/local?days=60');
+                const data = await response.json();
+                
+                allLocalEvents = data.events || [];
+                displayLocalEvents(allLocalEvents);
+            } catch (error) {
+                console.error('Error loading local events:', error);
+                document.getElementById('local-events').innerHTML = 
+                    '<div class="no-events">Error loading events. Please try again.</div>';
+            }
+        }
+
+        function displayLocalEvents(events) {
+            const eventsDiv = document.getElementById('local-events');
+            
+            if (!events || events.length === 0) {
+                const searchInput = document.getElementById('events-search');
+                const searchKeyword = searchInput.value.trim();
+                
+                // Show "no results" with option to search online
+                eventsDiv.innerHTML = `
+                    <div class="no-events">
+                        <p>No local events found matching your criteria.</p>
+                        ${searchKeyword ? `
+                            <button class="refresh-btn" onclick="searchEventsOnline('${searchKeyword}')" style="margin-top: 15px;">
+                                🌐 Search Online for "${searchKeyword}" Events
+                            </button>
+                            <div id="online-search-results" style="margin-top: 20px;"></div>
+                        ` : ''}
+                    </div>
+                `;
+                return;
+            }
+            
+            eventsDiv.innerHTML = events.map(event => {
+                const eventDate = new Date(event.date + 'T' + event.time);
+                const formattedDate = eventDate.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    weekday: 'short'
+                });
+                const formattedTime = eventDate.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                const typeClass = `type-${event.type}`;
+                const typeName = event.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                
+                return `
+                    <div class="event-item">
+                        <div class="event-header">
+                            <span class="event-date-badge">${formattedDate} • ${formattedTime}</span>
+                            <span class="event-type-badge ${typeClass}">${typeName}</span>
+                        </div>
+                        <div class="event-title">${event.title}</div>
+                        <div class="event-description">📍 ${event.location}</div>
+                        <div class="event-description">${event.description}</div>
+                        <div style="margin-top: 8px;">
+                            ${event.tags.map(tag => `<span class="event-tag">${tag}</span>`).join('')}
+                        </div>
+                        ${event.url ? `<div style="margin-top: 8px;">
+                            <a href="${event.url}" target="_blank" class="event-link">🔗 More Info & Register</a>
+                        </div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function searchLocalEvents() {
+            const searchInput = document.getElementById('events-search');
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            if (!searchTerm && activeFilters.length === 0) {
+                displayLocalEvents(allLocalEvents);
+                return;
+            }
+            
+            const filtered = allLocalEvents.filter(event => {
+                const searchableText = (
+                    `${event.title} ${event.description} ${event.category} ${event.tags.join(' ')}`
+                ).toLowerCase();
+                
+                const matchesSearch = !searchTerm || searchableText.includes(searchTerm);
+                const matchesFilters = activeFilters.length === 0 || 
+                    activeFilters.some(filter => searchableText.includes(filter.toLowerCase()));
+                
+                return matchesSearch && matchesFilters;
+            });
+            
+            displayLocalEvents(filtered);
+        }
+
+        function toggleFilter(keyword) {
+            const chips = document.querySelectorAll('.filter-chip');
+            const clickedChip = Array.from(chips).find(chip => 
+                chip.textContent.toLowerCase().includes(keyword.toLowerCase())
+            );
+            
+            if (activeFilters.includes(keyword)) {
+                activeFilters = activeFilters.filter(f => f !== keyword);
+                clickedChip.classList.remove('active');
+            } else {
+                activeFilters.push(keyword);
+                clickedChip.classList.add('active');
+            }
+            
+            searchLocalEvents();
+        }
+
+        async function searchEventsOnline(keywords) {
+            const resultsDiv = document.getElementById('online-search-results');
+            resultsDiv.innerHTML = '<p style="text-align:center; color:#667eea;">🔄 Searching the web for real events...</p>';
+            
+            try {
+                const response = await fetch(`/api/events/search?keywords=${encodeURIComponent(keywords)}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    resultsDiv.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
+                    return;
+                }
+                
+                if (!data.events || data.events.length === 0) {
+                    resultsDiv.innerHTML = `
+                        <div style="background: #f8f9ff; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                            <p style="color: #666;">No events found online for "${keywords}".</p>
+                            <p style="color: #666; margin-top: 10px; font-size: 0.9em;">
+                                Try different keywords or check popular event sites like:
+                            </p>
+                            <ul style="margin-top: 10px; margin-left: 20px;">
+                                <li><a href="https://www.eventbrite.com/d/germany--freiburg/running/" target="_blank">Eventbrite</a></li>
+                                <li><a href="https://www.active.com/running/races" target="_blank">Active.com</a></li>
+                                <li><a href="https://www.meetup.com/find/?keywords=${encodeURIComponent(keywords)}" target="_blank">Meetup.com</a></li>
+                            </ul>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Display real events found online
+                resultsDiv.innerHTML = `
+                    <div style="margin: 20px 0;">
+                        <h3 style="color: #667eea; margin-bottom: 15px;">🌐 Found ${data.total} Real Events Online</h3>
+                        ${data.events.map(event => {
+                            const typeClass = `type-${event.type}`;
+                            const typeName = event.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                            
+                            return `
+                                <div class="event-item" style="border-left: 4px solid #667eea;">
+                                    <div class="event-header">
+                                        <span class="event-type-badge ${typeClass}">${typeName}</span>
+                                    </div>
+                                    <div class="event-title">${event.title}</div>
+                                    <div class="event-description">📍 ${event.location}</div>
+                                    <div class="event-description">${event.description}</div>
+                                    <div style="margin-top: 8px;">
+                                        ${event.tags.map(tag => `<span class="event-tag">${tag}</span>`).join('')}
+                                    </div>
+                                    ${event.url ? `<div style="margin-top: 10px;">
+                                        <a href="${event.url}" target="_blank" class="event-link" style="font-size: 1em;">
+                                            🔗 View Event Details & Register
+                                        </a>
+                                    </div>` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                        <p style="margin-top: 15px; color: #666; font-size: 0.9em; font-style: italic;">
+                            💡 These are real events found from the web. Click the links to view full details and register.
+                        </p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error searching events online:', error);
+                resultsDiv.innerHTML = '<p style="color:red;">Error searching online. Please try again.</p>';
+            }
+        }
+
+        // Load dashboard on page load
+        window.addEventListener('load', () => {
+            loadDashboard();
+            loadLocalEvents();
+        });
+
+        // Auto-refresh every 15 minutes
+        setInterval(loadDashboard, 15 * 60 * 1000);
+
+        // Modal functions
+        function showWeatherDetails() {
+            const modal = document.getElementById('weatherModal');
+            modal.style.display = 'block';
+            loadWeatherDetails();
+        }
+
+        function showTrainingDetails() {
+            const modal = document.getElementById('trainingModal');
+            modal.style.display = 'block';
+            loadTrainingDetails();
+        }
+
+        function showSleepAnalysis() {
+            const modal = document.getElementById('sleepModal');
+            modal.style.display = 'block';
+            loadSleepAnalysis();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        async function loadWeatherDetails() {
+            const detailsDiv = document.getElementById('weather-details-content');
+            detailsDiv.innerHTML = '<p style="text-align:center;">🔄 Loading detailed weather data...</p>';
+            
+            try {
+                const response = await fetch('/api/weather/details');
+                const data = await response.json();
+                
+                detailsDiv.innerHTML = `
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Temperature</div>
+                            <div class="detail-value">${Math.round(data.temperature)}°C</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Feels Like</div>
+                            <div class="detail-value">${Math.round(data.feels_like)}°C</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Humidity</div>
+                            <div class="detail-value">${data.humidity}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Pressure</div>
+                            <div class="detail-value">${data.pressure} hPa</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Wind Speed</div>
+                            <div class="detail-value">${data.wind_speed} m/s</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Wind Direction</div>
+                            <div class="detail-value">${data.wind_direction}°</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Visibility</div>
+                            <div class="detail-value">${(data.visibility / 1000).toFixed(1)} km</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Cloudiness</div>
+                            <div class="detail-value">${data.clouds}%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>🌡️ Temperature Details</h3>
+                        <p><strong>Min:</strong> ${Math.round(data.temp_min)}°C | <strong>Max:</strong> ${Math.round(data.temp_max)}°C</p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>☀️ Sun Times</h3>
+                        <p><strong>Sunrise:</strong> ${new Date(data.sunrise * 1000).toLocaleTimeString()}</p>
+                        <p><strong>Sunset:</strong> ${new Date(data.sunset * 1000).toLocaleTimeString()}</p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>📍 Location</h3>
+                        <p><strong>${data.city}</strong>, ${data.country}</p>
+                        <p>Coordinates: ${data.lat.toFixed(2)}°, ${data.lon.toFixed(2)}°</p>
+                    </div>
+                `;
+            } catch (error) {
+                detailsDiv.innerHTML = '<p style="color:red;">Error loading weather details</p>';
+            }
+        }
+
+        async function loadTrainingDetails() {
+            const detailsDiv = document.getElementById('training-details-content');
+            detailsDiv.innerHTML = '<p style="text-align:center;">🔄 Loading detailed training data...</p>';
+            
+            try {
+                const response = await fetch('/api/garmin/details');
+                const data = await response.json();
+                
+                detailsDiv.innerHTML = `
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Sleep Score</div>
+                            <div class="detail-value">${data.sleep_score}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Sleep Hours</div>
+                            <div class="detail-value">${(data.sleep_hours || 0).toFixed(1)}h</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Training Load</div>
+                            <div class="detail-value">${data.training_load}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Steps</div>
+                            <div class="detail-value">${data.steps}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Calories</div>
+                            <div class="detail-value">${data.calories}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Resting HR</div>
+                            <div class="detail-value">${data.heart_rate} bpm</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>📊 Training Status</h3>
+                        <p style="font-size:1.2em;"><strong>${data.training_status}</strong></p>
+                        <p>This indicates your current fitness trend and recovery state.</p>
+                    </div>
+                    
+                    ${data.body_battery ? `
+                    <div class="detail-section">
+                        <h3>🔋 Body Battery</h3>
+                        <p><strong>Current:</strong> ${data.body_battery_current}</p>
+                        <p><strong>Highest Today:</strong> ${data.body_battery_highest}</p>
+                        <p><strong>Lowest Today:</strong> ${data.body_battery_lowest}</p>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="detail-section">
+                        <h3>💡 Recommendations</h3>
+                        <ul style="margin-left:20px;">
+                            ${data.sleep_score >= 80 ? 
+                                '<li>✅ Great sleep! Your body is well-recovered for training.</li>' : 
+                                '<li>⚠️ Consider prioritizing recovery - your sleep score could be better.</li>'}
+                            ${data.training_load > 100 ? 
+                                '<li>🔥 High training load - make sure to schedule rest days.</li>' :
+                                '<li>💪 Moderate training load - good balance between work and recovery.</li>'}
+                            ${data.steps >= 7000 ? 
+                                '<li>🚶 Good daily activity level!</li>' :
+                                '<li>📈 Try to increase daily steps for better overall health.</li>'}
+                        </ul>
+                    </div>
+                `;
+            } catch (error) {
+                detailsDiv.innerHTML = '<p style="color:red;">Error loading training details</p>';
+            }
+        }
+
+        async function loadSleepAnalysis() {
+            const detailsDiv = document.getElementById('sleep-analysis-content');
+            detailsDiv.innerHTML = '<p style="text-align:center;">🔄 Loading sleep analysis data...</p>';
+            
+            try {
+                const response = await fetch('/api/sleep/analysis?days=7');
+                const data = await response.json();
+                
+                if (data.weekly_data && data.weekly_data.length === 0) {
+                    detailsDiv.innerHTML = '<p style="text-align:center; color:#999;">No sleep data available. Make sure your Garmin is synced.</p>';
+                    return;
+                }
+                
+                // Calculate total sleep stages for the week
+                const totalDeep = data.averages.deep_minutes;
+                const totalLight = data.averages.light_minutes;
+                const totalREM = data.averages.rem_minutes;
+                const totalAwake = data.averages.awake_minutes;
+                const totalMinutes = totalDeep + totalLight + totalREM + totalAwake;
+                
+                // Generate sleep stage bar
+                const stageBar = totalMinutes > 0 ? `
+                    <div class="sleep-stage-bar">
+                        <div class="stage-segment stage-deep" style="width: ${(totalDeep/totalMinutes*100).toFixed(1)}%">
+                            Deep ${Math.round(totalDeep)}m
+                        </div>
+                        <div class="stage-segment stage-light" style="width: ${(totalLight/totalMinutes*100).toFixed(1)}%">
+                            Light ${Math.round(totalLight)}m
+                        </div>
+                        <div class="stage-segment stage-rem" style="width: ${(totalREM/totalMinutes*100).toFixed(1)}%">
+                            REM ${Math.round(totalREM)}m
+                        </div>
+                        <div class="stage-segment stage-awake" style="width: ${(totalAwake/totalMinutes*100).toFixed(1)}%">
+                            Awake ${Math.round(totalAwake)}m
+                        </div>
+                    </div>
+                ` : '';
+                
+                // Generate trend indicator
+                const trendClass = data.trend === 'improving' ? 'trend-improving' : 
+                                   data.trend === 'declining' ? 'trend-declining' : 'trend-stable';
+                const trendText = data.trend === 'improving' ? '📈 Improving' : 
+                                  data.trend === 'declining' ? '📉 Declining' : '➡️ Stable';
+                
+                // Generate weekly chart
+                const maxHours = Math.max(...data.weekly_data.map(d => d.hours));
+                const chartBars = data.weekly_data.slice(0, 7).reverse().map(day => {
+                    const date = new Date(day.date);
+                    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                    const height = (day.hours / maxHours * 100);
+                    return `
+                        <div class="chart-bar" style="height: ${height}%">
+                            <div class="chart-bar-value">${day.hours.toFixed(1)}h</div>
+                            <div class="chart-bar-label">${dayName}</div>
+                        </div>
+                    `;
+                }).join('');
+                
+                detailsDiv.innerHTML = `
+                    <div class="detail-section">
+                        <h3>📊 Weekly Averages</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Sleep Score</div>
+                                <div class="detail-value">${data.averages.score}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Sleep Duration</div>
+                                <div class="detail-value">${data.averages.hours}h</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Deep Sleep</div>
+                                <div class="detail-value">${Math.round(data.averages.deep_minutes)}m</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">REM Sleep</div>
+                                <div class="detail-value">${Math.round(data.averages.rem_minutes)}m</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>😴 Average Sleep Stages</h3>
+                        ${stageBar}
+                        <p style="text-align:center; color:#666; font-size:0.9em;">
+                            Weekly average breakdown of sleep phases
+                        </p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>📈 Weekly Sleep Trend</h3>
+                        <div style="text-align:center; margin:15px 0;">
+                            <span class="sleep-trend-indicator ${trendClass}">${trendText}</span>
+                        </div>
+                        <div class="chart-bar-container">
+                            ${chartBars}
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>🎯 Sleep Consistency Score</h3>
+                        <div class="consistency-meter">
+                            <div class="consistency-fill" style="width: ${data.consistency_score}%"></div>
+                        </div>
+                        <p style="text-align:center; font-size:1.2em; font-weight:bold; color:#667eea;">
+                            ${data.consistency_score}/100
+                        </p>
+                        <p style="text-align:center; color:#666;">
+                            ${data.consistency_score >= 80 ? '✅ Excellent consistency! Keep it up.' :
+                              data.consistency_score >= 60 ? '👍 Good consistency, room for improvement.' :
+                              '⚠️ Try to maintain a more regular sleep schedule.'}
+                        </p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>⏰ Sleep Debt</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Total This Week</div>
+                                <div class="detail-value">${data.sleep_debt.total_hours}h</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Daily Average</div>
+                                <div class="detail-value">${data.sleep_debt.avg_daily}h</div>
+                            </div>
+                        </div>
+                        ${data.sleep_debt.avg_daily > 1 ? 
+                            '<p style="color:#ff9800; font-weight:bold; text-align:center;">⚠️ Consider scheduling catch-up sleep</p>' :
+                            '<p style="color:#4caf50; text-align:center;">✅ Minimal sleep debt!</p>'}
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>🌙 Optimal Bedtime</h3>
+                        <p style="text-align:center; font-size:1.5em; font-weight:bold; color:#667eea;">
+                            ${data.optimal_bedtime}
+                        </p>
+                        <p style="text-align:center; color:#666;">
+                            Based on 7-9 hours of sleep for optimal recovery
+                        </p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>💡 Personalized Recommendations</h3>
+                        ${data.recommendations.map(rec => `
+                            <div class="recommendation-item">${rec}</div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading sleep analysis:', error);
+                detailsDiv.innerHTML = '<p style="color:red;">Error loading sleep analysis. Please try again.</p>';
+            }
+        }
+
+        // Settings Sidebar Functions
+        function openSettings() {
+            document.getElementById('settingsSidebar').classList.add('active');
+            document.getElementById('settingsOverlay').classList.add('active');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsSidebar').classList.remove('active');
+            document.getElementById('settingsOverlay').classList.remove('active');
+        }
+
+        function toggleWidget(widgetId) {
+            const widget = document.getElementById(widgetId);
+            const toggle = document.querySelector(`[data-widget="${widgetId}"] .toggle-switch`);
+            
+            if (widget && toggle) {
+                widget.classList.toggle('widget-hidden');
+                toggle.classList.toggle('active');
+                saveSettings();
+            }
+        }
+
+        function saveSettings() {
+            const settings = {
+                'weather-card': !document.getElementById('weather-card').classList.contains('widget-hidden'),
+                'sleep-card': !document.getElementById('sleep-card').classList.contains('widget-hidden'),
+                'training-card': !document.getElementById('training-card').classList.contains('widget-hidden'),
+                'todo-section': !document.getElementById('todo-section').classList.contains('widget-hidden'),
+                'today-events-section': !document.getElementById('today-events-section').classList.contains('widget-hidden'),
+                'ai-day-plan': !document.getElementById('ai-day-plan').classList.contains('widget-hidden'),
+                'ai-freetime': !document.getElementById('ai-freetime').classList.contains('widget-hidden'),
+                'ai-nutrition': !document.getElementById('ai-nutrition').classList.contains('widget-hidden'),
+                'upcoming-events-section': !document.getElementById('upcoming-events-section').classList.contains('widget-hidden'),
+                'local-events-section': !document.getElementById('local-events-section').classList.contains('widget-hidden')
+            };
+            localStorage.setItem('dashboardSettings', JSON.stringify(settings));
+        }
+
+        function changePageColor(color) {
+            document.body.style.backgroundColor = color;
+            saveColorSettings();
+        }
+
+        function changeWidgetColor(widgetId, color) {
+            const widget = document.getElementById(widgetId);
+            if (widget) {
+                widget.style.backgroundColor = color;
+                // Update the color picker value
+                const colorPicker = widget.querySelector('.widget-color-picker input[type="color"]');
+                if (colorPicker) {
+                    colorPicker.value = color;
+                }
+                saveColorSettings();
+            }
+        }
+
+        function saveColorSettings() {
+            const colorSettings = {
+                pageBackground: document.body.style.backgroundColor || '#f0f2f5',
+                widgets: {}
+            };
+            
+            // Save each widget's color individually
+            ['weather-card', 'sleep-card', 'training-card', 'today-events-section', 
+             'upcoming-events-section', 'local-events-section', 'ai-day-plan', 
+             'ai-freetime', 'ai-nutrition'].forEach(id => {
+                const widget = document.getElementById(id);
+                if (widget) {
+                    colorSettings.widgets[id] = widget.style.backgroundColor || '#ffffff';
+                }
+            });
+            
+            localStorage.setItem('dashboardColors', JSON.stringify(colorSettings));
+        }
+
+        function loadColorSettings() {
+            const savedColors = localStorage.getItem('dashboardColors');
+            if (savedColors) {
+                const colors = JSON.parse(savedColors);
+                
+                // Apply page background
+                if (colors.pageBackground) {
+                    document.body.style.backgroundColor = colors.pageBackground;
+                    document.getElementById('page-bg-color').value = rgbToHex(colors.pageBackground);
+                }
+                
+                // Apply individual widget colors
+                if (colors.widgets) {
+                    Object.keys(colors.widgets).forEach(widgetId => {
+                        const widget = document.getElementById(widgetId);
+                        if (widget && colors.widgets[widgetId]) {
+                            widget.style.backgroundColor = colors.widgets[widgetId];
+                            // Update color picker in widget
+                            const colorPicker = widget.querySelector('.widget-color-picker input[type="color"]');
+                            if (colorPicker) {
+                                colorPicker.value = rgbToHex(colors.widgets[widgetId]);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function rgbToHex(rgb) {
+            // Convert rgb(r, g, b) to #rrggbb
+            if (rgb.startsWith('#')) return rgb;
+            const values = rgb.match(/\d+/g);
+            if (!values) return '#ffffff';
+            const hex = values.slice(0, 3).map(x => {
+                const h = parseInt(x).toString(16);
+                return h.length === 1 ? '0' + h : h;
+            }).join('');
+            return '#' + hex;
+        }
+
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('dashboardSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                
+                Object.keys(settings).forEach(widgetId => {
+                    const widget = document.getElementById(widgetId);
+                    const toggle = document.querySelector(`[data-widget="${widgetId}"] .toggle-switch`);
+                    
+                    if (widget && toggle) {
+                        if (settings[widgetId]) {
+                            // Widget should be visible
+                            widget.classList.remove('widget-hidden');
+                            toggle.classList.add('active');
+                        } else {
+                            // Widget should be hidden
+                            widget.classList.add('widget-hidden');
+                            toggle.classList.remove('active');
+                        }
+                    }
+                });
+            } else {
+                // Default: all widgets visible
+                document.querySelectorAll('.toggle-switch').forEach(toggle => {
+                    toggle.classList.add('active');
+                });
+            }
+        }
+
+        function resetSettings() {
+            if (confirm('Reset all settings to default? This will show all widgets and restore default colors.')) {
+                localStorage.removeItem('dashboardSettings');
+                localStorage.removeItem('dashboardColors');
+                
+                // Show all widgets
+                document.querySelectorAll('.widget-hidden').forEach(widget => {
+                    widget.classList.remove('widget-hidden');
+                });
+                
+                // Activate all toggles
+                document.querySelectorAll('.toggle-switch').forEach(toggle => {
+                    toggle.classList.add('active');
+                });
+                
+                // Reset page background
+                document.body.style.backgroundColor = '#f0f2f5';
+                document.getElementById('page-bg-color').value = '#f0f2f5';
+                
+                // Reset all widget colors
+                const defaultColor = '#ffffff';
+                ['weather-card', 'sleep-card', 'training-card', 'today-events-section', 
+                 'upcoming-events-section', 'local-events-section', 'ai-day-plan', 
+                 'ai-freetime', 'ai-nutrition'].forEach(id => {
+                    const widget = document.getElementById(id);
+                    if (widget) {
+                        widget.style.backgroundColor = defaultColor;
+                        const colorPicker = widget.querySelector('.widget-color-picker input[type="color"]');
+                        if (colorPicker) colorPicker.value = defaultColor;
+                    }
+                });
+                
+                alert('Settings reset to default!');
+            }
+        }
+
+        // Load settings on page load
+        window.addEventListener('load', function() {
+            loadSettings();
+            loadColorSettings();
+        });
+    </script>
+
+    <!-- Weather Details Modal -->
+    <div id="weatherModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🌤️ Detailed Weather Information</h2>
+                <span class="close" onclick="closeModal('weatherModal')">&times;</span>
+            </div>
+            <div class="modal-body" id="weather-details-content">
+                Loading...
+            </div>
+        </div>
+    </div>
+
+    <!-- Training Details Modal -->
+    <div id="trainingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💪 Detailed Fitness Metrics</h2>
+                <span class="close" onclick="closeModal('trainingModal')">&times;</span>
+            </div>
+            <div class="modal-body" id="training-details-content">
+                Loading...
+            </div>
+        </div>
+    </div>
+
+    <!-- Sleep Analysis Modal -->
+    <div id="sleepModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>😴 Sleep Analysis Dashboard</h2>
+                <span class="close" onclick="closeModal('sleepModal')">&times;</span>
+            </div>
+            <div class="modal-body" id="sleep-analysis-content">
+                Loading...
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+[
+  {
+    "id": 1,
+    "title": "Example Marathon 2026",
+    "category": "running",
+    "type": "race",
+    "date": "2026-04-30",
+    "time": "09:00",
+    "location": "Your City",
+    "description": "Example marathon event. Add your own local events here!",
+    "tags": [
+      "running",
+      "marathon",
+      "race"
+    ],
+    "url": "https://example.com/"
+  },
+  {
+    "id": 2,
+    "title": "Weekly Running Group",
+    "category": "running",
+    "type": "group_training",
+    "date": "2026-02-02",
+    "time": "09:00",
+    "location": "Local Park",
+    "description": "Free weekly group run. All abilities welcome!",
+    "tags": [
+      "running",
+      "group",
+      "weekly"
+    ],
+    "url": "https://example.com/"
+  },
+  {
+    "id": 3,
+    "title": "Example Conference",
+    "category": "professional",
+    "type": "conference",
+    "date": "2026-03-15",
+    "time": "09:00",
+    "location": "Convention Center",
+    "description": "Professional development conference.",
+    "tags": [
+      "conference",
+      "networking"
+    ],
+    "url": "https://example.com/"
+  }
+]
